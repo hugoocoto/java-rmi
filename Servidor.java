@@ -6,9 +6,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
 
-public class HelloServer extends UnicastRemoteObject implements HelloInterface {
+public class Servidor extends UnicastRemoteObject implements IMontecarlo {
 
-    public HelloServer() throws RemoteException {
+    public Servidor() throws RemoteException {
         super();
     }
 
@@ -17,11 +17,11 @@ public class HelloServer extends UnicastRemoteObject implements HelloInterface {
         BufferedReader br = new BufferedReader(is);
         String portNum, registryURL;
         try {
-            System.out.print("Enter the RMIregistry port number:");
+            System.out.print("Enter port number: ");
             portNum = (br.readLine()).trim();
             int RMIPortNum = Integer.parseInt(portNum);
             startRegistry(RMIPortNum);
-            HelloInterface exportedObj = new HelloServer();
+            IMontecarlo exportedObj = new Servidor();
             registryURL = "rmi://localhost:" + portNum + "/hello";
             Naming.rebind(registryURL, exportedObj);
             System.out.println("Server registered.  Registry currently contains:");
@@ -43,8 +43,7 @@ public class HelloServer extends UnicastRemoteObject implements HelloInterface {
 
             System.out.println("RMI registry cannot be located at port "
                     + RMIPortNum);
-            Registry registry
-                    = LocateRegistry.createRegistry(RMIPortNum);
+            Registry registry = LocateRegistry.createRegistry(RMIPortNum);
             System.out.println(
                     "RMI registry created at port " + RMIPortNum);
         }
@@ -60,8 +59,8 @@ public class HelloServer extends UnicastRemoteObject implements HelloInterface {
     }
 
     @Override
-    public long sayHello(long n) throws RemoteException {
-        long m = 0;
+    public Integer getMontecarlo(Integer n) throws RemoteException {
+        Integer m = 0;
         double x, y;
         // Date d = new Date();
         // Random r = new Random(d.getTime());
@@ -70,10 +69,10 @@ public class HelloServer extends UnicastRemoteObject implements HelloInterface {
             x = Math.random();
             y = Math.random();
             if (x * x + y * y <= 1.0) {
-                ++m;
+                m += 1;
             }
         }
-        System.out.println("Returning m=" + m);
+        System.out.println("Returning m=" + m + "with n=" + n);
         return m;
     }
 

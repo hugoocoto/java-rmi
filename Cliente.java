@@ -3,15 +3,13 @@ import java.io.*;
 import java.rmi.Naming;
 import java.util.ArrayList;
 
-/* Autor: Hugo Coto Florez
- *
- * Notas: Que puto asco da este codigo 
- * 
- */
-public class HelloClient {
+/* Autor: Hugo Coto Florez */
 
-    static ArrayList<String> registryURLs = new ArrayList<>();
-    static ArrayList<Double> solutions = new ArrayList<>();
+public class Cliente {
+
+    private static ArrayList<String> registryURLs = new ArrayList<>();
+    private static ArrayList<Integer> solutions = new ArrayList<>();
+    private static Integer n;
 
     public static void main(String args[]) {
         try {
@@ -22,10 +20,18 @@ public class HelloClient {
             BufferedReader br = new BufferedReader(is);
 
             int nn = 0;
+            int iters = 0;
             while (true) {
                 try {
-                    System.out.print("Number of servers:");
+                    System.out.print("Number of iterations: ");
+                    iters = Integer.parseInt(br.readLine());
+                    System.out.print("Number of servers: ");
                     nn = Integer.parseInt(br.readLine());
+                    if (iters % nn != 0) {
+                        System.out.println("Iterations are not divisible by servers!");
+                        continue;
+                    }
+                    n = iters / nn;
                     break;
                 } catch (Exception e) {
                     System.out.println(e);
@@ -33,10 +39,16 @@ public class HelloClient {
             }
 
             for (int i = 0; i < nn; i++) {
-                System.out.print("Host:");
+                System.out.print("[" + i + "] Host: ");
                 hostName = br.readLine();
-                System.out.print("Port:");
+                if (hostName.isEmpty()) {
+                    hostName = "localhost";
+                }
+                System.out.print("[" + i + "] Port: ");
                 portNum = br.readLine();
+                if (portNum.isEmpty()) {
+                    portNum = "8080";
+                }
                 registryURLs.add("rmi://" + hostName + ":" + portNum + "/hello");
             }
 
@@ -73,20 +85,16 @@ public class HelloClient {
         for (int thread_n = 0; thread_n < solutions.size(); thread_n++) {
             pi += solutions.get(thread_n);
         }
-        pi /= solutions.size();
+
+        pi = 4 * (double) pi / ((double) n * solutions.size());
+
         System.out.println("Pi: " + pi);
     }
 
     private static void launch_a_server(String registryURL) {
         try {
-            HelloInterface h = (HelloInterface) Naming.lookup(registryURL);
-            System.out.println("Lookup completed for " + registryURL);
-
-            long n = 1000000;
-            long message = h.sayHello(n);
-            double pi = 4 * (double) message / (double) n;
-            solutions.add(pi);
-            System.out.println(String.format("Pi is aprox: %g", pi));
+            IMontecarlo h = (IMontecarlo) Naming.lookup(registryURL);
+            solutions.add(h.getMontecarlo(n));
 
         } catch (Exception e) {
             System.out.println("Exception in: " + e);
